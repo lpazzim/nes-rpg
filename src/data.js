@@ -42,9 +42,9 @@ export const HEROES = [
 // --- NPCs e diálogos ----------------------------------------------------
 // speed: passeio (px/s) | radius: colisão | talkRange: alcance da tecla E
 // pause: pausa entre passeios (s) | charsPerSecond: velocidade do texto
-// maxChars: letras por linha (fonte monoespaçada de 8 px ~ 4,4 px cada)
+// maxChars: letras por linha (fonte bitmap de src/font.js: 6 px por letra)
 export const NPC_TUNING = { speed: 25, radius: 6, talkRange: 28, pause: [1.5, 4] };
-export const DIALOG = { charsPerSecond: 40, maxChars: 84, linesPerPage: 3 };
+export const DIALOG = { charsPerSecond: 40, maxChars: 72, linesPerPage: 3 };
 
 // Custos de MP e regeneração (usado pelo herói de poderes)
 export const MAGE = { redCost: 8, mpRegen: 2.5 };

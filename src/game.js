@@ -278,7 +278,8 @@ export class Game {
     ctx.restore();
 
     if (W.dark) this.drawDarkness(ctx, cx, cy);
-    drawHud(ctx, this);
+    // o HUD so aparece quando o mundo esta em foco; as telas tem rodape proprio
+    if (this.mode === 'play' || this.mode === 'dialog') drawHud(ctx, this);
     if (this.mode === 'menu') this.menu.draw(ctx);
     if (this.mode === 'shop') this.shop.draw(ctx);
     if (this.mode === 'dialog') this.dialog.draw(ctx);

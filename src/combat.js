@@ -1,6 +1,7 @@
 // =====================================================================
 // COMBATE: áreas de dano (hitboxes), fórmula de dano e efeitos visuais
 // =====================================================================
+import { drawText, fontScale } from './font.js';
 
 // Uma Hitbox é qualquer coisa que causa dano: um corte de katana,
 // um orbe mágico, uma explosão, a pancada do golem...
@@ -71,13 +72,15 @@ export function drawFx(ctx) {
   ctx.textAlign = 'left';
 }
 
+// Texto do jogo: fonte bitmap (src/font.js), com sombra e contorno escuros.
+// Respeita o ctx.textAlign de quem chamou, como o fillText fazia.
 export function outlineText(ctx, text, x, y, color, size = 8) {
-  ctx.font = `bold ${size}px monospace`;
-  ctx.fillStyle = '#000';
-  ctx.fillText(text, x + 1, y + 1);
-  ctx.fillText(text, x - 1, y);
-  ctx.fillStyle = color;
-  ctx.fillText(text, x, y);
+  const a = ctx.textAlign;
+  const align = a === 'center' || a === 'right' ? a : 'left';
+  const d = fontScale(size);                 // contorno acompanha a escala da fonte
+  drawText(ctx, text, x + d, y + d, '#000', size, align);
+  drawText(ctx, text, x - d, y, '#000', size, align);
+  drawText(ctx, text, x, y, color, size, align);
 }
 
 // Desenho dos projéteis e áreas de efeito

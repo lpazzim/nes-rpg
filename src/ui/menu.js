@@ -140,14 +140,14 @@ export class Menu {
       text(ctx, k, sx, y, '#aab0d8', 8);
       text(ctx, String(v), 400, y, '#ffffff', 8, 'right');
     });
-    text(ctx, 'Golpes', px, 176, '#ffd84a', 8);
-    h.data.skills.forEach((s, i) => text(ctx, s, px, 190 + i * 11, '#e8ecff', 7));
+    text(ctx, 'Golpes', px, 172, '#ffd84a', 8);
+    h.data.skills.forEach((s, i) => text(ctx, s, px, 185 + i * 11, '#e8ecff', 7));
     // pecas equipadas numa linha so (os atributos acima ja as somam)
     const pecas = SLOTS.map((slot) => {
       const id = h.equipped[slot];
       return id ? EQUIPMENT[id].name : `${SLOT_NAMES[slot]}: -`;
     }).join('  /  ');
-    text(ctx, pecas, px, 222, '#cfd6ff', 7);
+    text(ctx, pecas, px, 220, '#cfd6ff', 7);
   }
 
   drawItems(ctx) {

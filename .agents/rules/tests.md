@@ -38,6 +38,7 @@ npm test      # node --test "tests/**/*.test.mjs"
 | `maps.test.mjs` | Saídas apontam para mapa e entrada existentes; entradas andáveis e fora de saídas; tudo alcançável; tipos de inimigo válidos; mapas determinísticos |
 | `content.test.mjs` | Animações obrigatórias de heróis e inimigos (por comportamento); quadros válidos; atributos de inimigo; itens; `.claude/skills` sincronizado |
 | `rules.test.mjs` | Dano mínimo, crítico, curva de XP, dados dos heróis |
+| `font.test.mjs` | Fonte bitmap: todo ASCII tem desenho, grade 5x8 válida, escala inteira, falas cabem na caixa |
 | `shop.test.mjs` | Comprar, vender, descansar: ouro nunca negativo, bolsa entre 1 e 99, entradas inválidas recusadas, 500 operações aleatórias com semente |
 | `equipment.test.mjs` | Equipar/tirar sem vazar atributo, estilo da arma, teto da reducao de dano, PODER, entradas invalidas |
 | `save.test.mjs` | Conversao de saves antigos (v1 -> v2): progresso e forca preservados |

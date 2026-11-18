@@ -11,7 +11,7 @@ Diretrizes obrigatórias para todo código do jogo (`src/`), das ferramentas (`t
 | Identificadores (variáveis, funções, classes, arquivos de código) | Inglês | `spawnZone`, `enterMap`, `Hero` |
 | Conteúdo do jogo (ids de mapa, entradas, textos, nomes) | Português | `'vila'`, `'caverna'`, `'Pocao'` |
 | Comentários e documentação | Português (PT-BR) | `// cristal: cura tudo e abre o save` |
-| Texto desenhado no canvas | Português **sem acentos** (fonte do sistema) | `'Nao teve efeito'` |
+| Texto desenhado no canvas | Português **sem acentos** (a fonte bitmap só tem ASCII) | `'Nao teve efeito'` |
 
 ---
 

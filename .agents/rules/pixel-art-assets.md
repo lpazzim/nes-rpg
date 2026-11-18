@@ -11,6 +11,7 @@
 | Chefes | Até 2x o tamanho (campo `scale` em `ENEMIES`) |
 | Blocos | 16 x 16 px |
 | Cores | 15 bits (canais múltiplos de 8); até 40 cores por personagem (`colors` no config) |
+| Texto | Fonte bitmap própria (`src/font.js`), 5x7 px por letra; nunca a fonte do sistema |
 | Sombra | Elipse preta semitransparente sob os pés (gerada pelo pipeline a partir da sombra da folha) |
 | Contorno | Escuro, herdado da arte original |
 
@@ -77,7 +78,7 @@ Problemas comuns: furos em cinzas parecidos com o fundo (o fundo é removido só
 
 | Recurso | Formato | Local |
 | :--- | :--- | :--- |
-| Retrato do menu | Busto, quadrado (~256 px), fundo liso ou transparente | `assets/portraits/<id>.png` + id em `portraits.json` |
+| Retrato do menu | Busto, quadrado, **102x102 px** (desenhado 1:1, sem redução no jogo) | `assets/portraits/<id>.png` + id em `portraits.json` |
 | Ícones de item (futuro) | 16 x 16, folha em grade | `assets/source/items_sheet.png` |
 | Tileset/inspiração de mapa | Qualquer; **só referência** | `assets/source/*_inspiration.*` |
 | Áudio (futuro) | `.ogg` curto e em loop | `assets/audio/` |

@@ -66,7 +66,8 @@ Inimigos: **Espantalho** (foice e salto), **Treant** (disfarçado de toco; garra
 - **Save:** toque no **cristal azul** (tecla E). Ele cura o grupo e abre os 3 espaços de save. Há cristais na vila, na entrada da caverna e antes do chefe.
 - **Tela título:** Novo jogo ou Continuar. Na tela de Game Over dá para carregar o último save.
 - **Itens:** Poção, Poção Forte, Éter e Pena de Fênix. Use pelo menu. Os inimigos deixam ouro e às vezes poções.
-- **Retratos do menu:** coloque `assets/portraits/kaito.png` (e rin, aster) e liste os nomes em `assets/portraits/portraits.json`, por exemplo `["kaito", "rin", "aster"]`. Sem retrato, o menu mostra o sprite ampliado.
+- **Retratos do menu:** ficam em `assets/portraits/<heroi>.png` (102x102) e os nomes em `assets/portraits/portraits.json`. Os atuais vieram da arte de selecao de personagem; o recorte grande de cada um esta em `assets/source/retrato_*.png`. Sem retrato, o menu mostra o sprite ampliado.
+- **Fonte:** o texto usa uma fonte de pixels propria (`src/font.js`), desenhada letra a letra, para ficar nitido em tela cheia. Para mudar uma letra, edite o desenho dela: `#` e pixel aceso, `.` e vazio.
 
 ### Criar ou editar mapas
 
@@ -113,6 +114,7 @@ src/maps/              mapas de cada aventura e o gerador de dungeons
 src/heroes.js          heróis: controles, IA dos aliados, golpes, animações
 src/enemies.js         inimigos: IA (emboscada, bloqueio, tiro, salto) e animações
 src/sprites.js         carrega os sprites e toca as animações
+src/font.js            fonte de pixels do jogo (desenho de cada letra)
 src/combat.js          hitboxes, fórmula de dano, números e partículas
 src/world.js           mapa carregado: colisão, saídas e desenho
 src/map/art.js         arte do mapa (grama, água, caverna, muralha, árvores, casas...)

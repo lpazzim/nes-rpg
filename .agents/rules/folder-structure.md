@@ -44,6 +44,7 @@ my-rpg/
 | `heroes.js` / `enemies.js` | Entidades: controle, IA, golpes, animação, desenho |
 | `combat.js` | `Hitbox`, fórmula de dano, partículas e textos flutuantes |
 | `sprites.js` | Carrega `sprites.json`, `Animator`, `drawFrame`, retratos |
+| `font.js` | **Fonte bitmap**: desenho de cada letra, largura e escala (1x/2x/3x) |
 | `world.js` | Mapa carregado: colisão, saídas, objetos visíveis, desenho do chão |
 | `hud.js` | Barras do grupo, chefe, ajuda e banner |
 | `map/art.js` | Arte pintada por código: blocos do chão, objetos, efeitos animados |
@@ -73,7 +74,7 @@ Nomes de arquivo: `<nome>_sheet.png|webp` em `source/`, sempre em minúsculas e 
 ## 4. `tools/`, `tests/`, `prompts/`, `tasks/`
 
 - `tools/`: `build-sprites.js`, `detect-frames.js`, `sprites.config.js` (animações), `sync-skills.js`.
-- `tests/`: `maps.test.mjs`, `content.test.mjs`, `rules.test.mjs`, `dialog.test.mjs`, `shop.test.mjs`, `systems.test.mjs`, `equipment.test.mjs`, `save.test.mjs`; testes novos seguem `<assunto>.test.mjs`.
+- `tests/`: `maps.test.mjs`, `content.test.mjs`, `rules.test.mjs`, `dialog.test.mjs`, `shop.test.mjs`, `systems.test.mjs`, `equipment.test.mjs`, `save.test.mjs`, `font.test.mjs`; testes novos seguem `<assunto>.test.mjs`.
 - `prompts/`: `NN-<slug>.md` em ordem de execução + `README.md` com o roteiro.
 - `tasks/prd-<slug>/`: `prd.md`, `techspec.md`, `tasks.md`, `task_N.md`, `codereview.md`, `qa.md`, `evidences/`.
 

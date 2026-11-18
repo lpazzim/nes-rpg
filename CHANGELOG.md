@@ -4,6 +4,18 @@ Histórico de entregas do projeto, da mais recente para a mais antiga.
 Formato: uma seção por entrega com **Adicionado**, **Alterado**, **Corrigido** e **Removido** (só as que existirem).
 Quando a entrega vier de um PRD, cite o slug: `tasks/prd-<slug>/`.
 
+## [Retratos e fonte de pixels] — 2026-11-18
+
+### Adicionado
+- **Retratos dos herois** no menu, a partir da arte de selecao de personagem: Kaito, Rin e Aster aparecem na aba Status e nos cartoes do grupo. Os recortes grandes ficaram em `assets/source/retrato_*.png`.
+- **Fonte de pixels propria** (`src/font.js`): cada letra e um desenho de 5x7 pixels, com 8 testes que conferem a tabela inteira.
+
+### Alterado
+- Todo o texto do jogo passou a usar a fonte nova. Antes era a fonte do sistema, que desenha as bordas suavizadas e por isso ficava **borrada quando o jogo era aberto em tela cheia**. Agora o texto fica nitido em qualquer tamanho de janela.
+- Como a fonte nova e um pouco mais larga, os layouts foram ajustados: a caixa de ajuda ficou maior, o nome do mapa desceu para nao cruzar com ela, e os cartoes dos herois foram reorganizados (o numero de MP da lugar ao aviso "PODER!" quando a barra enche).
+- As falas quebram em 72 letras por linha (antes 84), para continuarem cabendo na caixa.
+- A ajuda do canto e os cartoes do grupo somem quando o menu, a loja ou a tela de save estao abertos: antes apareciam como sombra atras do texto.
+
 ## [Equipamentos] — 2026-11-18
 
 PRD: `tasks/prd-equipamentos/` · Revisão: APROVADO · QA: APROVADO (16/16 critérios)

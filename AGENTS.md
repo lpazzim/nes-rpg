@@ -69,7 +69,7 @@ npm run skills:sync         # copia .agents/skills para .claude/skills
 Detalhes e regras de dependência em [folder-structure.md](.agents/rules/folder-structure.md).
 
 ```
-src/          jogo (ES modules)        -> data.js, game.js, combat-system.js, interaction.js, equipment.js, shop.js, heroes.js, enemies.js, ui/, maps/, map/art.js
+src/          jogo (ES modules)        -> data.js, game.js, combat-system.js, interaction.js, equipment.js, shop.js, font.js, heroes.js, enemies.js, ui/, maps/, map/art.js
 assets/       source/ (arte original), sprites/ (gerado), portraits/ (retratos do menu)
 tools/        scripts Node: build-sprites, detect-frames, sprites.config, sync-skills
 tests/        testes automáticos (*.test.mjs)
@@ -91,7 +91,7 @@ Detalhes em [game-architecture.md](.agents/rules/game-architecture.md).
 5. **Conversas**: falas em `dialogues.js` (dados), lógica em `dialog-runner.js` (pura, testada) e caixa em `ui/dialog.js`; o modo `dialog` congela o mundo.
 6. **Loja e estalagem**: estoques e preços em `items.js` (`SHOPS`, `INNS`, por id de NPC), regras puras em `shop.js` (testadas), tela em `ui/shop.js` (modo `shop`); a estalagem usa a conversa e `game.startTransition`. As ações `shop`/`sell`/`inn` saem das falas e são tratadas em `interaction.js`.
 7. **Equipamento**: pecas em `equipment.js` (tabela + regras puras). O heroi guarda os atributos **proprios** (`baseAtk`, `baseDefense`, `baseSpeed`, `baseCrit`, `baseMaxMp`) e expoe os efetivos por getters (`atk`, `defense`...), somando o bonus recalculado em `recalcEquip()`. Equipar nunca altera o atributo proprio.
-8. **Sprites** vêm de `assets/sprites/sprites.json`; `Animator` toca animações por nome (`idle_down`, `attack`...).
+8. **Sprites** vêm de `assets/sprites/sprites.json`; `Animator` toca animações por nome (`idle_down`, `attack`...). **Todo texto** passa por `outlineText` (`combat.js`), que desenha com a fonte bitmap de `font.js` — nunca use `ctx.fillText`, que sai borrado ao ampliar a tela.
 9. **Estado da campanha**: `flags` (chefes derrotados), `gold`, `inventory`, `playTime` e os heróis (com o equipamento). Tudo vai para o save, hoje na **versao 2**; saves da versao 1 sao convertidos em `migrateSave` (`save.js`).
 
 ### Decisões arquiteturais
@@ -176,5 +176,5 @@ Uma entrega só está pronta quando:
 | `src/map/art.js` (~770 linhas) | Difícil de navegar | Dividir em `map/tiles/*.js` e `map/objects/*.js` quando for mexer |
 | Ataques só têm quadros de lado | Atacar para cima/baixo mostra pose lateral | Pedir quadros de ataque de frente/costas |
 | Quadros 24–31 do Kaito com roupa marrom | Não usados | Pedir correção da folha |
-| Texto no canvas sem acentos | Fonte do sistema | Fonte bitmap própria na fase de polimento |
+| Fonte bitmap sem letras acentuadas | Textos do jogo escritos sem acento | Desenhar os glifos acentuados em `src/font.js` (a tabela aceita qualquer caractere) |
 | Sem lint | Estilo depende de revisão | Avaliar ESLint (devDependency) se o time crescer |
