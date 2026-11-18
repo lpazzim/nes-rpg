@@ -1,0 +1,17 @@
+{
+  "name": "my-rpg",
+  "version": "1.0.0",
+  "description": "RPG de acao estilo SNES",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "sprites": "node tools/build-sprites.js",
+    "skills:sync": "node tools/sync-skills.js"
+  },
+  "type": "commonjs",
+  "devDependencies": {
+    "sharp": "^0.33.5"
+  },
+  "private": true
+}
