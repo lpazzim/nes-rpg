@@ -3,6 +3,8 @@
 // use(heroi) devolve um texto de resultado, ou false se não fez efeito.
 // =====================================================================
 
+import { EQUIPMENT } from './equipment.js';
+
 export const ITEMS = {
   potion: {
     name: 'Pocao', price: 30, desc: 'Recupera 60 HP de um aliado.',
@@ -45,8 +47,16 @@ export const MAX_STACK = 99;   // limite de cada item na bolsa
 export const SELL_RATE = 0.5;  // venda = preço x 0,5, arredondado para baixo
 
 export const SHOPS = {
-  mercador_fazenda: { name: 'Loja da Pradaria', stock: ['potion', 'hipotion', 'ether', 'phoenix'] },
+  mercador_fazenda: {
+    name: 'Loja da Pradaria',
+    stock: ['potion', 'hipotion', 'ether', 'phoenix',
+      'katana_aco', 'adagas_afiadas', 'bastao_cristal', 'tunica_viajante', 'bracelete_cobre'],
+  },
 };
+
+// Procura um id na bolsa: consumivel (ITEMS) ou peca de equipamento (EQUIPMENT).
+// Toda a loja usa isto, entao vender e comprar funcionam para os dois.
+export const findItem = (id) => ITEMS[id] || EQUIPMENT[id] || null;
 
 export const INNS = {
   estalajadeira: { price: 20 },

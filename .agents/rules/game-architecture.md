@@ -60,6 +60,8 @@ Contrato mínimo para qualquer coisa que luta (heróis e inimigos):
 | `draw(ctx)` | Desenho em coordenadas do mundo (heróis recebem `isLeader`) |
 
 Heróis também têm `power` (0–100), `mp`, `level`, `xp`, `toSave()`/`loadSave()` e `placeAt(x, y, dir)`.
+
+**Atributos do herói:** os campos gravados são os **próprios** (`baseAtk`, `baseDefense`, `baseSpeed`, `baseCrit`, `baseMaxMp`), que crescem com o nível. `atk`, `defense`, `speed`, `crit`, `maxMp`, `powerGain` e `damageReduction` são **getters**: próprio + bônus do equipamento, com `bonus` recalculado em `recalcEquip()` (nunca somado ao próprio). Nível soma em `base*`; equipamento nunca altera `base*`.
 Inimigos têm `d` (a definição em `ENEMIES`), `zone`, `boss`, `state` (`idle`, `chase`, `attack`, `hurt`, `block`, `hidden`, `emerge`), `onDamaged()`, `blocksFrom(src)` e `gone` (pode remover).
 
 ### Comportamentos de inimigo por flag em `ENEMIES`
@@ -137,16 +139,16 @@ Estado da campanha no `Game`: `flags`, `gold`, `inventory`, `playTime`, `heroes`
 
 | Campo do save | Conteúdo |
 | :--- | :--- |
-| `v` | `SAVE_VERSION` (em `save.js`) |
+| `v` | `SAVE_VERSION` (em `save.js`); hoje **2** |
 | `savedAt` | Data em ms |
 | `map`, `entry` | Mapa e entrada do **cristal** onde salvou |
 | `flags` | Ex.: `{ bosque: true }` (chefe da aventura 1 derrotado) |
 | `gold`, `inventory`, `playTime` | Economia e tempo |
-| `heroes[]` | `Hero.toSave()`: `id, name, level, xp, hp, mp, maxHp, maxMp, atk, defense, speed, crit, power, alive` |
+| `heroes[]` | `Hero.toSave()`: `id, name, level, xp, hp, mp, maxHp, baseMaxMp, baseAtk, baseDefense, baseSpeed, baseCrit, power, alive, equip` |
 
 Regras:
 1. Campo novo no estado da campanha → incluir em `saveGame`, `loadGame` e `newGame`.
-2. Mudou o formato de forma incompatível → incremente `SAVE_VERSION`. Hoje saves de versão diferente são **ignorados**. Se houver jogadores com progresso, escreva uma migração em `readSave` antes de incrementar.
+2. Mudou o formato de forma incompatível → incremente `SAVE_VERSION` **e escreva a migração** em `migrateSave` (`save.js`, pura e testada), chamada por `readSave`. Versões desconhecidas continuam sendo ignoradas. Nada reescreve o save antigo em disco: ele só é regravado quando o jogador salva.
 3. Flags têm nomes curtos em português e são documentadas em [maps-and-adventures.md](maps-and-adventures.md#6-flags-da-campanha).
 
 ---
@@ -154,6 +156,8 @@ Regras:
 ## 9. Checklists de extensão
 
 **Novo inimigo:** folha em `assets/source/` → `/integrar-sprites` → entrada em `ENEMIES` (todos os atributos de `content.test.mjs`) → zona em um mapa → `npm test` → jogar contra ele no preview.
+
+**Nova peça de equipamento:** entrada em `EQUIPMENT` (`src/equipment.js`) com `name`, `slot`, `price`, `desc` e, se for arma, `style` → id no `stock` de uma loja (`SHOPS`) ou em `BOSS_DROP` → `npm test` (`TI-01`/`TI-03`) → equipar pelo menu no preview.
 
 **Novo item:** entrada em `ITEMS` com `use(hero)` (devolve texto ou `false`) → `ITEM_ORDER` → preço → (se for vendido) id no `stock` da loja em `SHOPS` → teste em `content.test.mjs` → usar pelo menu no preview.
 

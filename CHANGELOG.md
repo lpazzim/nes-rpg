@@ -4,6 +4,31 @@ Histórico de entregas do projeto, da mais recente para a mais antiga.
 Formato: uma seção por entrega com **Adicionado**, **Alterado**, **Corrigido** e **Removido** (só as que existirem).
 Quando a entrega vier de um PRD, cite o slug: `tasks/prd-<slug>/`.
 
+## [Equipamentos] — 2026-11-18
+
+PRD: `tasks/prd-equipamentos/` · Revisão: APROVADO · QA: APROVADO (16/16 critérios)
+
+### Adicionado
+- **Equipamento por heroi**: arma, armadura e acessorio, com 15 pecas. A arma depende do estilo (katana do Kaito, adagas da Rin, bastao do Aster); armaduras e acessorios servem a todos.
+- Aba **Equip.** do menu funcionando: escolha o espaco, veja as pecas da bolsa e a **comparacao** antes de confirmar (verde melhora, vermelho piora). "Tirar" esvazia o espaco.
+- Efeitos especiais: **Anel do Impeto** enche o PODER 30% mais rapido; armaduras e o acessorio do chefe **reduzem o dano recebido** (5% a 12%, somando no maximo 25%).
+- A loja da vila passa a vender armas, armadura e acessorio; o **Treant Anciao** deixa o **Coracao do Bosque** no chao.
+- O Status mostra os atributos ja somados com o equipamento e as pecas equipadas.
+- A lista da loja agora **rola** quando passa de 9 itens, com indicadores "^ mais" e "v mais".
+- Testes de equipamento e de conversao de save (116 no total).
+
+### Alterado
+- O heroi agora guarda os atributos **proprios** (que crescem com o nivel) separados do bonus das pecas, que e recalculado a partir do que esta equipado. Isso impede que trocar de peca "suje" os atributos.
+- A loja passou a reconhecer pecas de equipamento (mesma bolsa e as mesmas regras de compra e venda).
+
+### Corrigido
+- O jogo nao tenta mais desenhar o mapa antes de ele estar carregado (evitava um erro no console em transicoes).
+- A peça do Treant Anciao nao se perde mais: fica no chao ate ser pega e reaparece ao voltar a arena. Quem ja venceu o chefe recebe a peca ao reentrar na arena.
+- Apertar Enter na aba Equip. nao fecha mais o menu.
+
+### Atencao
+- O formato do save mudou para a **versao 2**. Saves antigos sao **convertidos automaticamente** ao carregar, preservando nivel, ouro, bolsa, flags e a forca dos herois; as armas iniciais (sem bonus) entram equipadas. O save antigo so e regravado quando voce salva no cristal.
+
 ## [Loja e estalagem] — 2026-11-17
 
 PRD: `tasks/prd-loja-e-estalagem/` · Revisão: APROVADO · QA: APROVADO (15/15 critérios)

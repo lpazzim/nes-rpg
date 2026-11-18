@@ -100,6 +100,7 @@ Objeto novo: função em `OBJECTS` devolvendo `{ buf, ax, ay, foot | solids, fla
 | Flag | Significado | Definida em |
 | :--- | :--- | :--- |
 | `bosque` | Treant Ancião derrotado (aventura 1 concluída) | zona do chefe em `bosque_boss` |
+| `premio_bosque` | Coração do Bosque já foi pego (senão a peça volta ao chão ao reentrar na arena) | `updatePickups` |
 
 Toda flag nova entra nesta tabela.
 

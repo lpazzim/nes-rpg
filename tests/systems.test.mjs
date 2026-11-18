@@ -9,8 +9,14 @@ import { fileURLToPath } from 'node:url';
 import { gainXp } from '../src/combat-system.js';
 import { xpToNext } from '../src/data.js';
 
+// herói falso com o contrato novo: atributos próprios em base*, efetivos em getters
 const hero = (over = {}) => ({
-  alive: true, x: 0, y: 0, xp: 0, level: 1, maxHp: 100, hp: 40, atk: 10, defense: 5, maxMp: 20, mp: 3, ...over,
+  alive: true, x: 0, y: 0, xp: 0, level: 1, maxHp: 100, hp: 40,
+  baseAtk: 10, baseDefense: 5, baseMaxMp: 20, mp: 3, bonus: { atk: 0, defense: 0, maxMp: 0 },
+  get atk() { return this.baseAtk + this.bonus.atk; },
+  get defense() { return this.baseDefense + this.bonus.defense; },
+  get maxMp() { return this.baseMaxMp + this.bonus.maxMp; },
+  ...over,
 });
 
 // TU-01
@@ -20,6 +26,8 @@ test('gainXp: sobe de nível com os mesmos ganhos de antes', () => {
   assert.equal(h.level, 2);
   assert.equal(h.xp, 0);
   assert.deepEqual([h.maxHp, h.hp, h.atk, h.defense, h.maxMp, h.mp], [110, 110, 12, 6, 24, 24]);
+  // o ganho de nível vai para os atributos próprios, não para o bônus de equipamento
+  assert.deepEqual([h.baseAtk, h.baseDefense, h.baseMaxMp], [12, 6, 24]);
 });
 
 test('gainXp: XP parcial não sobe de nível', () => {
@@ -35,7 +43,7 @@ test('gainXp: herói caído não ganha XP', () => {
 });
 
 test('gainXp: herói sem MP não ganha MP ao subir', () => {
-  const h = hero({ maxMp: 0, mp: 0 });
+  const h = hero({ baseMaxMp: 0, mp: 0 });
   gainXp([h], xpToNext(1));
   assert.deepEqual([h.maxMp, h.mp], [0, 0]);
 });

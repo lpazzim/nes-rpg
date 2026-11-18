@@ -113,3 +113,27 @@ test('TU-14: 500 operações aleatórias com semente nunca quebram os limites', 
     }
   }
 });
+
+// --- regressão do QA: a lista da loja rola, o cursor nunca sai da janela -------
+test('BUG-01 (QA): scrollTop mantém o cursor dentro das 9 linhas visíveis', async () => {
+  const { scrollTop } = await import('../src/ui/shop.js');
+  const V = 9, total = 12;
+  assert.equal(scrollTop(0, 0, V, total), 0);
+  assert.equal(scrollTop(8, 0, V, total), 0, 'a 9a linha ainda cabe sem rolar');
+  assert.equal(scrollTop(9, 0, V, total), 1, 'a 10a linha empurra a janela');
+  assert.equal(scrollTop(11, 1, V, total), 3, 'a ultima linha fecha a janela no fim');
+  assert.equal(scrollTop(2, 3, V, total), 2, 'subir devolve a janela');
+  assert.equal(scrollTop(0, 3, V, total), 0);
+  // lista curta: nunca rola
+  assert.equal(scrollTop(3, 0, V, 5), 0);
+  // varredura: para qualquer posição o cursor fica visível
+  let top = 0;
+  for (let sel = 0; sel < total; sel++) {
+    top = scrollTop(sel, top, V, total);
+    assert.ok(sel >= top && sel < top + V, `sel ${sel} fora da janela (top ${top})`);
+  }
+  for (let sel = total - 1; sel >= 0; sel--) {
+    top = scrollTop(sel, top, V, total);
+    assert.ok(sel >= top && sel < top + V, `sel ${sel} fora da janela subindo (top ${top})`);
+  }
+});

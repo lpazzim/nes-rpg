@@ -8,6 +8,7 @@
 import { MAGE } from './data.js';
 import { burst, floatText, dot } from './combat.js';
 import { Animator, drawFrame } from './sprites.js';
+import { STARTER, equipBonus, statValue } from './equipment.js';
 
 const TIMERS = ['atkCd', 'skillCd', 'dashCd', 'dashT', 'invT', 'flashT', 'animT', 'comboT', 'actionT', 'hurtT'];
 
@@ -21,9 +22,14 @@ export class Hero {
     this.fx = 0; this.fy = 1;                 // direção para onde olha
     this.level = 1; this.xp = 0;
     this.maxHp = data.maxHp; this.hp = data.maxHp;
-    this.maxMp = data.maxMp; this.mp = data.maxMp;
-    this.atk = data.atk; this.defense = data.def;
-    this.speed = data.speed; this.crit = data.crit;
+    // atributos PROPRIOS do heroi (base + ganhos de nivel). O que o jogo le
+    // (this.atk, this.speed...) e isto somado ao equipamento, nos getters abaixo.
+    this.baseMaxMp = data.maxMp;
+    this.baseAtk = data.atk; this.baseDefense = data.def;
+    this.baseSpeed = data.speed; this.baseCrit = data.crit;
+    this.equipped = { weapon: STARTER[data.id] ?? null, armor: null, accessory: null };
+    this.recalcEquip();
+    this.mp = this.maxMp;
     this.power = 0;                           // barra de PODER (0..100)
     this.alive = true;
     this.kbx = 0; this.kby = 0;
@@ -101,16 +107,41 @@ export class Hero {
     s.update(dt * (this.dashT > 0 ? 2 : 1));
   }
 
+  // --- Equipamento ---------------------------------------------------------
+  // O bonus e sempre recalculado a partir das pecas (nunca somado ao base),
+  // entao equipar e tirar varias vezes nao "vaza" atributo. Chamado ao criar
+  // o heroi, ao trocar de peca e ao carregar o save.
+  recalcEquip() {
+    this.bonus = equipBonus(this.equipped);
+    if (this.mp > this.maxMp) this.mp = this.maxMp;   // tirou uma peca de MP
+  }
+
+  // atributos efetivos (proprios + equipamento), usados por todo o jogo
+  get atk() { return statValue(this.baseAtk, this.bonus.atk, 'atk'); }
+  get defense() { return statValue(this.baseDefense, this.bonus.defense, 'defense'); }
+  get speed() { return statValue(this.baseSpeed, this.bonus.speed, 'speed'); }
+  get crit() { return statValue(this.baseCrit, this.bonus.crit, 'crit'); }
+  get maxMp() { return statValue(this.baseMaxMp, this.baseMaxMp > 0 ? this.bonus.maxMp : 0, 'maxMp'); }
+  get powerGain() { return this.data.powerGain * (1 + this.bonus.power); }
+  get damageReduction() { return this.bonus.dr; }
+
   lunge(force) { this.kbx += this.fx * force; this.kby += this.fy * force; }
 
   // --- Save ---------------------------------------------------------------
-  static SAVED = ['level', 'xp', 'hp', 'mp', 'maxHp', 'maxMp', 'atk', 'defense', 'speed', 'crit', 'power', 'alive'];
+  // Salvamos os atributos PROPRIOS (base*), nunca os efetivos: o bonus do
+  // equipamento e recalculado ao carregar, a partir das pecas.
+  static SAVED = ['level', 'xp', 'hp', 'mp', 'maxHp', 'baseMaxMp', 'baseAtk', 'baseDefense',
+    'baseSpeed', 'baseCrit', 'power', 'alive'];
   toSave() {
-    const o = { id: this.data.id, name: this.name };
+    const o = { id: this.data.id, name: this.name, equip: { ...this.equipped } };
     for (const k of Hero.SAVED) o[k] = this.alive || k !== 'hp' ? this[k] : 0;
     return o;
   }
-  loadSave(o) { for (const k of Hero.SAVED) if (o[k] !== undefined) this[k] = o[k]; }
+  loadSave(o) {
+    for (const k of Hero.SAVED) if (o[k] !== undefined) this[k] = o[k];
+    if (o.equip) this.equipped = { weapon: null, armor: null, accessory: null, ...o.equip };
+    this.recalcEquip();
+  }
 
   // coloca o herói num ponto, parado e olhando para uma direção
   placeAt(x, y, dir) {

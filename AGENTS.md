@@ -69,7 +69,7 @@ npm run skills:sync         # copia .agents/skills para .claude/skills
 Detalhes e regras de dependência em [folder-structure.md](.agents/rules/folder-structure.md).
 
 ```
-src/          jogo (ES modules)        -> data.js, game.js, combat-system.js, interaction.js, heroes.js, enemies.js, ui/, maps/, map/art.js
+src/          jogo (ES modules)        -> data.js, game.js, combat-system.js, interaction.js, equipment.js, shop.js, heroes.js, enemies.js, ui/, maps/, map/art.js
 assets/       source/ (arte original), sprites/ (gerado), portraits/ (retratos do menu)
 tools/        scripts Node: build-sprites, detect-frames, sprites.config, sync-skills
 tests/        testes automáticos (*.test.mjs)
@@ -90,8 +90,9 @@ Detalhes em [game-architecture.md](.agents/rules/game-architecture.md).
 4. **Entidades** (`Hero`, `Enemy`, `Npc`) expõem `update(dt, game)` e `draw(ctx)`. O dano sempre passa por `Hitbox` → `game.damage()`; NPCs não lutam.
 5. **Conversas**: falas em `dialogues.js` (dados), lógica em `dialog-runner.js` (pura, testada) e caixa em `ui/dialog.js`; o modo `dialog` congela o mundo.
 6. **Loja e estalagem**: estoques e preços em `items.js` (`SHOPS`, `INNS`, por id de NPC), regras puras em `shop.js` (testadas), tela em `ui/shop.js` (modo `shop`); a estalagem usa a conversa e `game.startTransition`. As ações `shop`/`sell`/`inn` saem das falas e são tratadas em `interaction.js`.
-7. **Sprites** vêm de `assets/sprites/sprites.json`; `Animator` toca animações por nome (`idle_down`, `attack`...).
-8. **Estado da campanha**: `flags` (chefes derrotados), `gold`, `inventory`, `playTime` e os heróis. Tudo vai para o save.
+7. **Equipamento**: pecas em `equipment.js` (tabela + regras puras). O heroi guarda os atributos **proprios** (`baseAtk`, `baseDefense`, `baseSpeed`, `baseCrit`, `baseMaxMp`) e expoe os efetivos por getters (`atk`, `defense`...), somando o bonus recalculado em `recalcEquip()`. Equipar nunca altera o atributo proprio.
+8. **Sprites** vêm de `assets/sprites/sprites.json`; `Animator` toca animações por nome (`idle_down`, `attack`...).
+9. **Estado da campanha**: `flags` (chefes derrotados), `gold`, `inventory`, `playTime` e os heróis (com o equipamento). Tudo vai para o save, hoje na **versao 2**; saves da versao 1 sao convertidos em `migrateSave` (`save.js`).
 
 ### Decisões arquiteturais
 
@@ -113,7 +114,8 @@ Detalhes em [game-architecture.md](.agents/rules/game-architecture.md).
 | 2 | Tela título, save em cristais (3 espaços), menu Status/Itens | Concluída |
 | 3 | NPCs e diálogos (4 moradores na vila, conversas com escolhas) | Concluída (`tasks/prd-npcs-e-dialogos/`) |
 | 4 | Loja e estalagem (compra/venda, descanso pago) e divisão do `game.js` | Concluída (`tasks/prd-loja-e-estalagem/`) |
-| 5+ | Equipamentos, aventuras 2 e 3, troca de classe, polimento | Ver [prompts/README.md](prompts/README.md) |
+| 5 | Equipamentos (3 espacos por heroi, loja e recompensa de chefe) e save v2 com migracao | Concluida (`tasks/prd-equipamentos/`) |
+| 6+ | Aventuras 2 e 3, troca de classe, polimento | Ver [prompts/README.md](prompts/README.md) |
 
 O histórico de entregas fica em [CHANGELOG.md](CHANGELOG.md).
 

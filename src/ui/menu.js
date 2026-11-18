@@ -5,7 +5,9 @@ import { VIEW_W, xpToNext } from '../data.js';
 import { ITEMS, ITEM_ORDER } from '../items.js';
 import { formatTime } from '../save.js';
 import { sheets, portraits } from '../sprites.js';
-import { win, text, bar, cursor, navY, confirm, back, hpColor } from './ui.js';
+import { win, text, bar, cursor, navY, navX, confirm, back, hpColor } from './ui.js';
+import { EquipTab } from './equip.js';
+import { SLOTS, SLOT_NAMES, EQUIPMENT } from '../equipment.js';
 
 const TABS = ['Status', 'Itens', 'Equip.'];
 
@@ -13,6 +15,7 @@ export class Menu {
   constructor(game) {
     this.game = game; this.tab = 0; this.hero = game.leaderIdx; this.item = 0;
     this.targeting = false; this.msg = null; this.msgT = 0; this.t = 0;
+    this.equip = new EquipTab(game);
   }
   get items() { return ITEM_ORDER.filter((id) => this.game.inventory[id] > 0); }
 
@@ -20,8 +23,8 @@ export class Menu {
     this.t += dt;
     if (this.msgT > 0) this.msgT -= dt;
     const g = this.game, heroes = g.heroes;
-    if (input.wasPressed('KeyQ')) { this.tab = (this.tab + TABS.length - 1) % TABS.length; this.targeting = false; }
-    if (input.wasPressed('KeyE', 'Tab')) { this.tab = (this.tab + 1) % TABS.length; this.targeting = false; }
+    if (input.wasPressed('KeyQ')) { this.tab = (this.tab + TABS.length - 1) % TABS.length; this.targeting = false; this.equip.reset(); }
+    if (input.wasPressed('KeyE', 'Tab')) { this.tab = (this.tab + 1) % TABS.length; this.targeting = false; this.equip.reset(); }
 
     if (this.tab === 1 && !this.targeting) {
       const list = this.items;
@@ -30,6 +33,14 @@ export class Menu {
       this.item = Math.min(this.item, Math.max(0, list.length - 1));
       if (confirm(input) && list.length) this.targeting = true;
       else if (back(input)) g.closeMenu();
+      return;
+    }
+    // aba Equipamento: cima/baixo escolhem o espaco, esquerda/direita o heroi
+    if (this.tab === 2) {
+      const dx = navX(input);
+      if (dx && this.equip.step === 'slot') this.hero = (this.hero + dx + heroes.length) % heroes.length;
+      const usouTecla = this.equip.update(dt, input, this.hero);
+      if (!usouTecla && (back(input) || input.wasPressed('Enter'))) g.closeMenu();
       return;
     }
     const d = navY(input);
@@ -71,9 +82,9 @@ export class Menu {
     text(ctx, `Ouro: ${g.gold} G`, 20, 242, '#ffd84a', 8);
     text(ctx, `Tempo: ${formatTime(g.playTime)}`, 120, 242, '#ffffff', 8);
     text(ctx, g.world.name, 460, 242, '#cfd6ff', 8, 'right');
-    const hint = this.tab === 1
+    const hint = this.equipHint() ?? (this.tab === 1
       ? (this.targeting ? 'Setas: escolher heroi   J: usar   K: voltar' : 'Setas: escolher item   J: selecionar   K: fechar')
-      : 'Setas: escolher heroi   K/Enter: fechar';
+      : 'Setas: escolher heroi   K/Enter: fechar');
     text(ctx, hint, 20, 256, '#aab0d8', 7);
     if (this.msgT > 0) { win(ctx, 200, 120, 230, 24); text(ctx, this.msg, 315, 136, '#ffffff', 8, 'center'); }
   }
@@ -131,6 +142,12 @@ export class Menu {
     });
     text(ctx, 'Golpes', px, 176, '#ffd84a', 8);
     h.data.skills.forEach((s, i) => text(ctx, s, px, 190 + i * 11, '#e8ecff', 7));
+    // pecas equipadas numa linha so (os atributos acima ja as somam)
+    const pecas = SLOTS.map((slot) => {
+      const id = h.equipped[slot];
+      return id ? EQUIPMENT[id].name : `${SLOT_NAMES[slot]}: -`;
+    }).join('  /  ');
+    text(ctx, pecas, px, 222, '#cfd6ff', 7);
   }
 
   drawItems(ctx) {
@@ -154,13 +171,12 @@ export class Menu {
     }
   }
 
-  drawEquip(ctx) {
-    const h = this.game.heroes[this.hero];
-    text(ctx, `Equipamento - ${h.name}`, 172, 46, '#ffd84a', 9);
-    ['Arma', 'Armadura', 'Acessorio'].forEach((s, i) => {
-      text(ctx, s, 184, 70 + i * 18, '#aab0d8', 8);
-      text(ctx, i === 0 ? h.data.role : '-', 456, 70 + i * 18, '#ffffff', 8, 'right');
-    });
-    text(ctx, 'A troca de equipamentos chega junto com as lojas.', 315, 160, '#8890b8', 8, 'center');
+  drawEquip(ctx) { this.equip.draw(ctx, this.hero); }
+  // dica do rodape quando a aba Equipamento esta aberta
+  equipHint() {
+    if (this.tab !== 2) return null;
+    return this.equip.step === 'list'
+      ? 'Cima/baixo: peca   J: equipar   K: voltar'
+      : 'Cima/baixo: espaco   Esq/dir: heroi   J: abrir   K: fechar';
   }
 }

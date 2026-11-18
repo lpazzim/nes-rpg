@@ -35,6 +35,7 @@ my-rpg/
 | `data.js` | **Tabelas de balanceamento**: heróis, inimigos, XP, constantes de tela |
 | `items.js` | Tabela de itens e o efeito de cada um; lojas (`SHOPS`) e estalagens (`INNS`) por id de NPC |
 | `shop.js` | Regras puras de comprar, vender e descansar (operam sobre `{ gold, inventory }`) |
+| `equipment.js` | **Tabela das pecas** (`EQUIPMENT`) e regras puras de equipar, bonus e comparacao |
 | `dialogues.js` | **Falas dos NPCs** (só texto, editável pelo dono do projeto) |
 | `dialog-runner.js` | Lógica pura das conversas (páginas, letra a letra, escolhas, versões por flag) |
 | `npcs.js` | Entidade `Npc` (parado/passeio, conversa, animação) |
@@ -51,7 +52,7 @@ my-rpg/
 | `maps/adventureN.js` | Mapas de cada aventura (um arquivo por aventura) |
 | `maps/index.js` | Registro `MAPS`, `NEW_GAME`, `ADVENTURES` |
 | `ui/ui.js` | Componentes: janela, texto, barra, cursor, navegação |
-| `ui/*.js` | Telas: `title.js`, `menu.js`, `slots.js`, `dialog.js`, `shop.js` |
+| `ui/*.js` | Telas: `title.js`, `menu.js`, `slots.js`, `dialog.js`, `shop.js`, `equip.js` (aba do menu) |
 
 Arquivo novo de tela vai para `ui/`; aventura nova vira `maps/adventureN.js`; sistema novo de jogo ganha arquivo próprio em `src/` (ex.: `shop.js`, `equipment.js`).
 
@@ -72,7 +73,7 @@ Nomes de arquivo: `<nome>_sheet.png|webp` em `source/`, sempre em minúsculas e 
 ## 4. `tools/`, `tests/`, `prompts/`, `tasks/`
 
 - `tools/`: `build-sprites.js`, `detect-frames.js`, `sprites.config.js` (animações), `sync-skills.js`.
-- `tests/`: `maps.test.mjs`, `content.test.mjs`, `rules.test.mjs`, `dialog.test.mjs`, `shop.test.mjs`, `systems.test.mjs`; testes novos seguem `<assunto>.test.mjs`.
+- `tests/`: `maps.test.mjs`, `content.test.mjs`, `rules.test.mjs`, `dialog.test.mjs`, `shop.test.mjs`, `systems.test.mjs`, `equipment.test.mjs`, `save.test.mjs`; testes novos seguem `<assunto>.test.mjs`.
 - `prompts/`: `NN-<slug>.md` em ordem de execução + `README.md` com o roteiro.
 - `tasks/prd-<slug>/`: `prd.md`, `techspec.md`, `tasks.md`, `task_N.md`, `codereview.md`, `qa.md`, `evidences/`.
 

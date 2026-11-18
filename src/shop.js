@@ -4,7 +4,7 @@
 // (o próprio Game serve). Só alteram a carteira quando devolvem ok: true;
 // a quantidade na bolsa fica sempre entre 1 e MAX_STACK (0 remove a chave).
 // =====================================================================
-import { ITEMS, ITEM_ORDER, MAX_STACK, SELL_RATE } from './items.js';
+import { ITEM_ORDER, MAX_STACK, SELL_RATE, findItem } from './items.js';
 
 /**
  * @typedef {Object} Wallet
@@ -19,21 +19,23 @@ const isQty = (n) => Number.isInteger(n) && n >= 1;
 const owned = (w, id) => w.inventory[id] || 0;
 
 export function sellPrice(id) {
-  return ITEMS[id] ? Math.floor(ITEMS[id].price * SELL_RATE) : 0;
+  const it = findItem(id);
+  return it ? Math.floor(it.price * SELL_RATE) : 0;
 }
 
 // quantas unidades ainda dá para comprar (ouro e limite da bolsa)
 export function maxBuy(w, id) {
-  if (!ITEMS[id]) return 0;
-  return Math.max(0, Math.min(Math.floor(w.gold / ITEMS[id].price), MAX_STACK - owned(w, id)));
+  const it = findItem(id);
+  if (!it) return 0;
+  return Math.max(0, Math.min(Math.floor(w.gold / it.price), MAX_STACK - owned(w, id)));
 }
 
 /** @returns {ShopResult} */
 export function buy(w, id, qty) {
-  if (!ITEMS[id]) return { ok: false, reason: 'unknown' };
+  if (!findItem(id)) return { ok: false, reason: 'unknown' };
   if (!isQty(qty)) return { ok: false, reason: 'qty' };
   if (owned(w, id) + qty > MAX_STACK) return { ok: false, reason: 'full' };
-  const cost = ITEMS[id].price * qty;
+  const cost = findItem(id).price * qty;
   if (cost > w.gold) return { ok: false, reason: 'gold' };
   w.gold -= cost;
   w.inventory[id] = owned(w, id) + qty;
@@ -42,7 +44,7 @@ export function buy(w, id, qty) {
 
 /** @returns {ShopResult} */
 export function sell(w, id, qty) {
-  if (!ITEMS[id]) return { ok: false, reason: 'unknown' };
+  if (!findItem(id)) return { ok: false, reason: 'unknown' };
   if (!isQty(qty)) return { ok: false, reason: 'qty' };
   if (qty > owned(w, id)) return { ok: false, reason: 'none' };
   const gain = sellPrice(id) * qty;
@@ -54,7 +56,7 @@ export function sell(w, id, qty) {
 
 // itens da bolsa que podem ser vendidos (ordem do menu, depois o resto)
 export function sellableItems(inventory) {
-  const has = (id) => ITEMS[id] && inventory[id] > 0;
+  const has = (id) => findItem(id) && inventory[id] > 0;
   const rest = Object.keys(inventory).filter((id) => has(id) && !ITEM_ORDER.includes(id));
   return [...ITEM_ORDER.filter(has), ...rest];
 }

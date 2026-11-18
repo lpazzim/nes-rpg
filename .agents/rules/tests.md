@@ -39,6 +39,8 @@ npm test      # node --test "tests/**/*.test.mjs"
 | `content.test.mjs` | Animações obrigatórias de heróis e inimigos (por comportamento); quadros válidos; atributos de inimigo; itens; `.claude/skills` sincronizado |
 | `rules.test.mjs` | Dano mínimo, crítico, curva de XP, dados dos heróis |
 | `shop.test.mjs` | Comprar, vender, descansar: ouro nunca negativo, bolsa entre 1 e 99, entradas inválidas recusadas, 500 operações aleatórias com semente |
+| `equipment.test.mjs` | Equipar/tirar sem vazar atributo, estilo da arma, teto da reducao de dano, PODER, entradas invalidas |
+| `save.test.mjs` | Conversao de saves antigos (v1 -> v2): progresso e forca preservados |
 | `systems.test.mjs` | XP (`gainXp`) e guarda de tamanho: nenhum arquivo de `src/` passa de 400 linhas (exceto `map/art.js`) |
 | `dialog.test.mjs` | Quebra de linha e páginas, letra a letra, escolhas, versões por flag, passeio e conversa do NPC |
 

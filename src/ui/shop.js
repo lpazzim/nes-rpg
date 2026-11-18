@@ -7,18 +7,26 @@
 // Ao sair chama onClose() — quem abriu volta o jogo ao modo 'play'.
 // =====================================================================
 import { VIEW_W, VIEW_H } from '../data.js';
-import { ITEMS, MAX_STACK } from '../items.js';
+import { MAX_STACK, findItem } from '../items.js';
 import { buy, sell, maxBuy, sellPrice, sellableItems } from '../shop.js';
 import { win, text, cursor, navY, navX, confirm, back } from './ui.js';
 
 const MSG_TIME = 1.4;
 const ROW_H = 16;
+const VISIBLE = 9;           // linhas que cabem na janela da lista (y 34..184)
+
+/** Primeira linha visível para o cursor `sel` nunca sair da janela (função pura). */
+export function scrollTop(sel, top, visible, total) {
+  if (sel < top) top = sel;
+  if (sel >= top + visible) top = sel - visible + 1;
+  return Math.max(0, Math.min(top, Math.max(0, total - visible)));
+}
 const GRAY = '#6a7090';
 
 export class ShopScreen {
   constructor(game, shop, kind, onClose) {
     this.game = game; this.shop = shop; this.kind = kind; this.onClose = onClose;
-    this.step = 'list'; this.sel = 0; this.qty = 1; this.msg = null; this.msgT = 0; this.t = 0;
+    this.step = 'list'; this.sel = 0; this.top = 0; this.qty = 1; this.msg = null; this.msgT = 0; this.t = 0;
   }
 
   get items() { return this.kind === 'buy' ? this.shop.stock : sellableItems(this.game.inventory); }
@@ -50,7 +58,7 @@ export class ShopScreen {
     const d = navX(input) - navY(input);
     if (d) this.qty = Math.max(1, Math.min(max, this.qty + d));
     if (!confirm(input)) return;
-    const name = ITEMS[id].name, n = this.qty;
+    const name = findItem(id).name, n = this.qty;
     const r = this.kind === 'buy' ? buy(this.game, id, n) : sell(this.game, id, n);
     if (r.ok) this.say(this.kind === 'buy' ? `Comprou ${n} ${name}!` : `Vendeu ${n} ${name} (+${r.gain} G)`);
     else this.say(r.reason === 'gold' ? 'Ouro insuficiente' : 'Nao foi possivel', false);
@@ -74,12 +82,17 @@ export class ShopScreen {
   drawList(ctx) {
     const list = this.items;
     if (!list.length) { text(ctx, 'Nada para vender', 240, 112, '#aab0d8', 9, 'center'); return; }
-    list.forEach((id, i) => {
-      const y = 54 + i * ROW_H;
+    // a lista rola quando passa de VISIBLE linhas (muitos equipamentos na bolsa)
+    this.top = scrollTop(this.sel, this.top, VISIBLE, list.length);
+    if (this.top > 0) text(ctx, '^ mais', 458, 46, '#aab0d8', 7, 'right');
+    if (this.top + VISIBLE < list.length) text(ctx, 'v mais', 458, 181, '#aab0d8', 7, 'right');
+    list.slice(this.top, this.top + VISIBLE).forEach((id, n) => {
+      const i = this.top + n;
+      const y = 50 + n * ROW_H;
       const enabled = this.kind === 'sell' || this.limit(id) > 0;
       const color = enabled ? '#ffffff' : GRAY;
-      const price = this.kind === 'buy' ? ITEMS[id].price : sellPrice(id);
-      text(ctx, ITEMS[id].name, 32, y, color, 8);
+      const price = this.kind === 'buy' ? findItem(id).price : sellPrice(id);
+      text(ctx, findItem(id).name, 32, y, color, 8);
       text(ctx, `${price} G`, 250, y, enabled ? '#ffd84a' : GRAY, 8, 'right');
       text(ctx, `Tem: ${this.owned(id)}`, 360, y, color, 8);
       if (i === this.sel) cursor(ctx, 20, y - 3, this.t);
@@ -88,9 +101,9 @@ export class ShopScreen {
 
   drawFooter(ctx) {
     const id = this.items[this.sel];
-    if (id) text(ctx, ITEMS[id].desc, 22, 208, '#e8ecff', 8);
+    if (id) text(ctx, findItem(id).desc, 22, 208, '#e8ecff', 8);
     if (this.step === 'qty' && id) {
-      const unit = this.kind === 'buy' ? ITEMS[id].price : sellPrice(id);
+      const unit = this.kind === 'buy' ? findItem(id).price : sellPrice(id);
       text(ctx, `Quantidade: < ${this.qty} >   Total: ${unit * this.qty} G`, 22, 228, '#ffffff', 8);
       text(ctx, this.kind === 'buy' ? 'J: comprar   K: voltar' : 'J: vender   K: voltar', 458, 228, '#aab0d8', 7, 'right');
     } else {

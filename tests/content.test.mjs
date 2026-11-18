@@ -129,28 +129,49 @@ test('.claude/skills está sincronizado com .agents/skills (npm run skills:sync)
 });
 
 // --- lojas e estalagens (TI-03) --------------------------------------------
-test('TI-03: estoques apontam para itens válidos e a vila vende os 4 itens', async () => {
-  const { SHOPS, INNS, ITEMS: I } = await import('../src/items.js');
+test('TI-03: estoques apontam para itens ou pecas validas; a vila vende os dois', async () => {
+  const { SHOPS, INNS, ITEMS: I, findItem } = await import('../src/items.js');
+  const { EQUIPMENT, isEquipment } = await import('../src/equipment.js');
   const { DIALOGUES } = await import('../src/dialogues.js');
   for (const [npc, shop] of Object.entries(SHOPS)) {
     assert.ok(DIALOGUES[npc], `loja "${npc}" sem NPC em DIALOGUES`);
-    assert.ok(shop.name && !/[^\x20-\x7e]/.test(shop.name), `nome da loja "${npc}" vazio ou com acento`);
-    assert.ok(shop.stock.length > 0 && shop.stock.length <= 8, `estoque de "${npc}" fora de 1..8 itens`);
+    assert.ok(shop.name && !/[^ -~]/.test(shop.name), `nome da loja "${npc}" vazio ou com acento`);
+    assert.ok(shop.stock.length > 0, `loja "${npc}" sem estoque`);
     for (const id of shop.stock) {
-      assert.ok(I[id], `item "${id}" não existe`);
-      assert.ok(Number.isInteger(I[id].price) && I[id].price > 0, `preço de "${id}" inválido`);
+      const it = findItem(id);
+      assert.ok(it, `item "${id}" nao existe`);
+      assert.ok(Number.isInteger(it.price) && it.price > 0, `preco de "${id}" invalido`);
+      // pecas marcadas shop:false (iniciais e recompensas) nao podem estar a venda
+      if (isEquipment(id)) assert.notEqual(EQUIPMENT[id].shop, false, `"${id}" nao deveria estar a venda`);
     }
+    assert.equal(new Set(shop.stock).size, shop.stock.length, `loja "${npc}" com item repetido`);
   }
   for (const [npc, inn] of Object.entries(INNS)) {
     assert.ok(DIALOGUES[npc], `estalagem "${npc}" sem NPC em DIALOGUES`);
-    assert.ok(Number.isInteger(inn.price) && inn.price > 0, `preço da estalagem "${npc}" inválido`);
+    assert.ok(Number.isInteger(inn.price) && inn.price > 0, `preco da estalagem "${npc}" invalido`);
   }
-  assert.deepEqual([...SHOPS.mercador_fazenda.stock].sort(), ['ether', 'hipotion', 'phoenix', 'potion']);
+  const vila = SHOPS.mercador_fazenda.stock;
+  for (const id of ['potion', 'hipotion', 'ether', 'phoenix']) assert.ok(vila.includes(id), `vila sem "${id}"`);
+  assert.ok(vila.some(isEquipment), 'a vila precisa vender ao menos uma peca de equipamento');
   assert.equal(INNS.estalajadeira.price, 20);
 });
 
+test('TI-04: a peca de recompensa do chefe existe e a flag e de uma zona de chefe', async () => {
+  const { BOSS_DROP, EQUIPMENT } = await import('../src/equipment.js');
+  const { MAPS } = await import('../src/maps/index.js');
+  const flagsDeChefe = new Set();
+  for (const def of Object.values(MAPS)) {
+    for (const z of def.build().zones ?? []) if (z.boss) flagsDeChefe.add(z.boss);
+  }
+  for (const [flag, id] of Object.entries(BOSS_DROP)) {
+    assert.ok(EQUIPMENT[id], `recompensa "${id}" nao existe`);
+    assert.equal(EQUIPMENT[id].shop, false, `recompensa "${id}" nao deveria estar a venda`);
+    assert.ok(flagsDeChefe.has(flag), `flag "${flag}" nao pertence a nenhuma zona de chefe`);
+  }
+});
+
 // --- estalagem (TI-04 completo e TI-05 da loja-e-estalagem) -------------------
-test('TI-04: nenhuma ação de conversa fora de shop/sell/inn (nem "soon")', () => {
+test('TI-06: nenhuma ação de conversa fora de shop/sell/inn (nem "soon")', () => {
   const known = new Set(['shop', 'sell', 'inn']);
   for (const [id, def] of Object.entries(DIALOGUES)) {
     for (const v of def.talk) {
@@ -163,4 +184,57 @@ test('TI-05 (loja): INN_LINES sem acentos e a oferta leva o preço', async () =>
   const { INN_LINES } = await import('../src/dialogues.js');
   for (const [k, v] of Object.entries(INN_LINES)) assert.ok(!/[^ -~]/.test(v), `INN_LINES.${k} tem acento`);
   assert.ok(INN_LINES.offer.includes('{price}'));
+});
+
+// --- equipamentos (TI-01, TI-02, TI-05) --------------------------------------
+test('TI-01: toda peca tem nome sem acentos, slot valido, preco inteiro e descricao', async () => {
+  const { EQUIPMENT, SLOTS } = await import('../src/equipment.js');
+  const STYLES = HEROES.map((h) => h.type);
+  for (const [id, p] of Object.entries(EQUIPMENT)) {
+    assert.ok(/^[a-z0-9_]+$/.test(id), `id "${id}" fora do padrao`);
+    assert.ok(p.name && !/[^\x20-\x7e]/.test(p.name), `nome de "${id}" vazio ou com acento`);
+    assert.ok(p.desc && !/[^\x20-\x7e]/.test(p.desc), `descricao de "${id}" vazia ou com acento`);
+    assert.ok(SLOTS.includes(p.slot), `slot de "${id}" invalido`);
+    assert.ok(Number.isInteger(p.price) && p.price > 0, `preco de "${id}" invalido`);
+    if (p.slot === 'weapon') assert.ok(STYLES.includes(p.style), `arma "${id}" sem estilo valido`);
+    else assert.equal(p.style, undefined, `"${id}" nao e arma e nao deveria ter estilo`);
+    for (const k of Object.keys(p.stats ?? {})) {
+      assert.ok(['atk', 'defense', 'speed', 'crit', 'maxMp'].includes(k), `"${id}" altera atributo desconhecido "${k}"`);
+    }
+  }
+});
+
+test('TI-02: todo heroi tem arma inicial propria, sem bonus', async () => {
+  const { EQUIPMENT, STARTER, equipBonus, canEquip } = await import('../src/equipment.js');
+  for (const h of HEROES) {
+    const id = STARTER[h.id];
+    assert.ok(id && EQUIPMENT[id], `heroi "${h.id}" sem arma inicial`);
+    assert.equal(EQUIPMENT[id].slot, 'weapon');
+    assert.ok(canEquip(h.type, id), `arma inicial de "${h.id}" nao e do estilo dele`);
+    const b = equipBonus({ weapon: id });
+    for (const k of ['atk', 'defense', 'speed', 'crit', 'maxMp', 'power', 'dr']) {
+      assert.equal(b[k], 0, `arma inicial de "${h.id}" nao pode dar bonus (${k})`);
+    }
+  }
+  // cada estilo de heroi tem pelo menos uma arma comprável
+  for (const h of HEROES) {
+    const compraveis = Object.values(EQUIPMENT).filter((p) => p.slot === 'weapon' && p.style === h.type && p.shop !== false);
+    assert.ok(compraveis.length >= 1, `nenhuma arma a venda para "${h.id}"`);
+  }
+});
+
+test('TI-05: nenhuma peca passa do teto de reducao nem zera um atributo do heroi', async () => {
+  const { EQUIPMENT, DR_CAP } = await import('../src/equipment.js');
+  for (const [id, p] of Object.entries(EQUIPMENT)) {
+    assert.ok((p.dr ?? 0) <= DR_CAP, `"${id}" sozinha passa do teto de reducao`);
+    assert.ok((p.power ?? 0) <= 1, `"${id}" dobra o PODER sozinha`);
+    for (const h of HEROES) {
+      const base = { atk: h.atk, defense: h.def, speed: h.speed, crit: h.crit, maxMp: h.maxMp };
+      for (const [k, v] of Object.entries(p.stats ?? {})) {
+        if (v >= 0) continue;
+        assert.ok(base[k] + v >= 1 || k === 'maxMp' || k === 'crit',
+          `"${id}" zera "${k}" do heroi "${h.id}" (${base[k]} ${v})`);
+      }
+    }
+  }
 });

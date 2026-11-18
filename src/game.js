@@ -7,7 +7,7 @@ import { Input } from './input.js';
 import { World } from './world.js';
 import { Hero } from './heroes.js';
 import { Hitbox, fx, floatText, updateFx, drawFx, drawHitbox } from './combat.js';
-import { applyDamage, explode, updateHitboxes, spawnZone, updateZones, updatePickups, drawPickups } from './combat-system.js';
+import { applyDamage, explode, updateHitboxes, spawnZone, updateZones, updatePickups, drawPickups, restoreBossPrizes } from './combat-system.js';
 import { nearInteractable, interact, separateFromNpcs } from './interaction.js';
 import { drawHud } from './hud.js';
 import { MAPS, NEW_GAME } from './maps/index.js';
@@ -120,6 +120,7 @@ export class Game {
     fx.texts.length = 0; fx.particles.length = 0;
     this.zones = W.zones.filter((z) => !(z.boss && this.flags[z.boss])).map((z) => ({ ...z, alive: 0, timer: 0 }));
     this.zones.forEach((z) => spawnZone(this, z));
+    restoreBossPrizes(this);
     this.exitCooldown = 0.6; this.sealedMsgT = 0;
     this.snapCamera();
     this.shakeT = 0; this.shakeMag = 0;
@@ -173,7 +174,7 @@ export class Game {
   damage(target, src, h) { applyDamage(this, target, src, h); }
 
   // itens no chão: 'heal' cura o grupo; 'potion' vai para a bolsa
-  dropPickup(x, y, kind) { this.pickups.push({ x, y, t: 0, kind }); }
+  dropPickup(x, y, kind, id) { this.pickups.push({ x, y, t: 0, kind, id }); }
 
   // ======================================================== interação
   nearInteractable() { return nearInteractable(this); }
@@ -252,6 +253,7 @@ export class Game {
     const ctx = this.ctx;
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     if (this.mode === 'title') { this.title.draw(ctx); this.drawFade(ctx); return; }
+    if (!this.world || !this.cam) { this.drawFade(ctx); return; }   // ainda entrando no mapa
 
     const W = this.world, s = this.shakeMag;
     const cx = Math.round(clamp(this.cam.x + (Math.random() * 2 - 1) * s, 0, Math.max(0, W.pxW - VIEW_W)));

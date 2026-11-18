@@ -8,7 +8,8 @@ import { TILE, RESPAWN_TIME, xpToNext } from './data.js';
 import { Enemy } from './enemies.js';
 import { calcDamage, floatText, burst, dot } from './combat.js';
 import { latestSave } from './save.js';
-import { MAX_STACK } from './items.js';
+import { MAX_STACK, findItem } from './items.js';
+import { BOSS_DROP, prizeFlag, pendingBossPrizes } from './equipment.js';
 
 // ---------------------------------------------------------------- dano
 export function applyDamage(game, target, src, h) {
@@ -20,6 +21,10 @@ export function applyDamage(game, target, src, h) {
     amount = Math.max(1, Math.round(amount * 0.15)); crit = false;
     floatText(target.x, target.y - 46, 'BLOQUEIO', '#cfe8ff', 7);
     burst(target.x + target.faceX * 10, target.y - 16, '#ffe08a', 6, 60);
+  }
+  // equipamento do heroi desconta parte do dano (minimo de 1 preservado)
+  if (target.isHero && target.damageReduction > 0) {
+    amount = Math.max(1, Math.round(amount * (1 - target.damageReduction)));
   }
   target.hp -= amount;
   target.flashT = 0.12;
@@ -34,7 +39,7 @@ export function applyDamage(game, target, src, h) {
   if (target.isHero) { target.invT = 0.7; target.hurtT = 0.25; }
   else {
     target.onDamaged?.(src, amount);
-    if (src?.isHero) src.power = Math.min(100, src.power + src.data.powerGain);
+    if (src?.isHero) src.power = Math.min(100, src.power + src.powerGain);
   }
   if (target.hp <= 0) target.isHero ? heroDown(game, target) : enemyDown(game, target);
 }
@@ -58,6 +63,9 @@ function enemyDown(game, e) {
     game.announce(`${e.name} derrotado!`, 2.5);
     game.later(2.6, () => game.announce('Um portal se abriu...', 2.5));
     game.dropPickup(e.x, e.y, 'heal');
+    // recompensa do chefe: a peca fica no chao, ao lado da cura
+    const prize = BOSS_DROP[e.zone.boss];
+    if (prize) game.dropPickup(e.x + 16, e.y, 'equip', prize);
   } else if (Math.random() < 0.12) game.dropPickup(e.x, e.y, 'heal');
   else if (Math.random() < 0.08) game.dropPickup(e.x, e.y, 'potion');
 }
@@ -71,8 +79,8 @@ export function gainXp(heroes, n) {
       h.xp -= xpToNext(h.level);
       h.level++;
       h.maxHp = Math.round(h.maxHp * 1.1); h.hp = h.maxHp;
-      h.atk += 2; h.defense += 1;
-      if (h.maxMp > 0) { h.maxMp += 4; h.mp = h.maxMp; }
+      h.baseAtk += 2; h.baseDefense += 1;
+      if (h.baseMaxMp > 0) { h.baseMaxMp += 4; h.mp = h.maxMp; }
       floatText(h.x, h.y - 50, 'LEVEL UP!', '#7fffd4', 9);
     }
   }
@@ -92,7 +100,13 @@ export function updatePickups(game, dt) {
     p.t += dt;
     if (!L || Math.hypot(L.x - p.x, L.y - p.y) >= 12) continue;
     p.taken = true;
-    if (p.kind === 'potion') {
+    if (p.kind === 'equip') {
+      // recompensa de chefe: vai para a bolsa e nunca mais reaparece
+      game.inventory[p.id] = (game.inventory[p.id] || 0) + 1;
+      const boss = Object.keys(BOSS_DROP).find((k) => BOSS_DROP[k] === p.id);
+      if (boss) game.flags[prizeFlag(boss)] = true;
+      floatText(p.x, p.y - 30, `+${findItem(p.id)?.name ?? 'Equipamento'}`, '#9fe4ff', 8);
+    } else if (p.kind === 'potion') {
       // bolsa cheia: o item some sem entrar (limite da loja também vale no chão)
       if ((game.inventory.potion || 0) < MAX_STACK) {
         game.inventory.potion = (game.inventory.potion || 0) + 1;
@@ -105,16 +119,17 @@ export function updatePickups(game, dt) {
         floatText(h.x, h.y - 44, '+HP', '#7dff8a', 8);
       }
     }
-    burst(p.x, p.y, '#7dff8a', 10, 70);
+    burst(p.x, p.y, p.kind === 'equip' ? '#9fe4ff' : '#7dff8a', 10, 70);
   }
-  game.pickups = game.pickups.filter((p) => !p.taken && p.t < 30);
+  // curas e pocoes somem em 30 s; a peca do chefe fica ate ser pega
+  game.pickups = game.pickups.filter((p) => !p.taken && (p.kind === 'equip' || p.t < 30));
 }
 
 export function drawPickups(ctx, pickups) {
   for (const p of pickups) {
     const y = p.y - 6 + Math.sin(p.t * 4) * 2;
-    if (p.t > 25 && Math.floor(p.t * 8) % 2) continue;
-    ctx.fillStyle = p.kind === 'potion' ? '#ff6ab0' : '#7dff8a';
+    if (p.kind !== 'equip' && p.t > 25 && Math.floor(p.t * 8) % 2) continue;
+    ctx.fillStyle = p.kind === 'equip' ? '#9fe4ff' : p.kind === 'potion' ? '#ff6ab0' : '#7dff8a';
     ctx.beginPath(); ctx.moveTo(p.x, y - 5); ctx.lineTo(p.x + 4, y); ctx.lineTo(p.x, y + 5); ctx.lineTo(p.x - 4, y); ctx.fill();
     ctx.fillStyle = '#ffffff'; dot(ctx, p.x - 1, y - 1, 1);
   }
@@ -127,6 +142,14 @@ export function spawnZone(game, z) {
     game.enemies.push(new Enemy(z.type, p.x, p.y, z));
   }
   z.alive = z.count; z.timer = 0;
+}
+
+// ao entrar num mapa: recoloca no chao a recompensa de chefe que ainda nao foi pega
+export function restoreBossPrizes(game) {
+  for (const p of pendingBossPrizes(game.flags, game.world.zones)) {
+    const spot = game.world.freeSpot(p.x, p.y, 1);
+    game.dropPickup(spot.x, spot.y, 'equip', p.id);
+  }
 }
 
 export function updateZones(game, dt) {

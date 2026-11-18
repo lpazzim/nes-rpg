@@ -21,7 +21,7 @@ Os artefatos ficam em `tasks/prd-<slug>/`. Ao avançar uma etapa, atualize a col
 | 2 | — | fase 2 (título, save, menu) | 1 | retratos (opcional) | Concluída (sem PRD) |
 | 3 | `03-npcs-e-dialogos.md` | `npcs-e-dialogos` | 2 | NPCs (entregue) | **Concluída** |
 | 4 | `04-loja-e-estalagem.md` | `loja-e-estalagem` | 3 | — (ícones opcionais) | **Concluída** |
-| 5 | `05-equipamentos.md` | `equipamentos` | 4 | ícones opcionais | Pendente |
+| 5 | `05-equipamentos.md` | `equipamentos` | 4 | ícones opcionais | **Concluída** |
 | 6 | `06-aventura-2-reino-de-pedra.md` | `aventura-2-reino-de-pedra` | 5 | chefe medieval, NPCs medievais | Pendente |
 | 7 | `07-aventura-3-neon.md` | `aventura-3-neon` | 6 | chefe futurista, NPCs futuristas | Pendente |
 | 8 | `08-troca-de-classe.md` | `troca-de-classe` | 6 | quadros das classes (opcional) | Pendente |
