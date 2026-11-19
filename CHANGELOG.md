@@ -4,6 +4,13 @@ Histórico de entregas do projeto, da mais recente para a mais antiga.
 Formato: uma seção por entrega com **Adicionado**, **Alterado**, **Corrigido** e **Removido** (só as que existirem).
 Quando a entrega vier de um PRD, cite o slug: `tasks/prd-<slug>/`.
 
+## [README profissional e capturas de tela] — 2026-11-19
+
+### Adicionado
+- **Capturas de tela reais do jogo** em `assets/screenshots/` (tela título, exploração e diálogo na vila, loja, menu de status/equipamentos e combate contra o chefe).
+- **Explicação bilíngue (PT-BR e EN)** no `README.md`, apresentando o projeto como um laboratório prático para estudar e visualizar os conceitos fundamentais de frontend (game loop, Canvas 2D pixel a pixel, ES modules sem build, separação entre estado puro e UI, `localStorage` versionado e testes nativos).
+- Seções dedicadas de **Stack Tecnológica** e **Decisões Arquiteturais** no `README.md`.
+
 ## [Retratos e fonte de pixels] — 2026-11-18
 
 ### Adicionado

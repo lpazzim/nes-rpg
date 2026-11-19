@@ -66,6 +66,7 @@ Arquivo novo de tela vai para `ui/`; aventura nova vira `maps/adventureN.js`; si
 | `source/` | Folhas de sprite e imagens de inspiração **originais**, como o usuário enviou | Usuário/agente (cópia) |
 | `sprites/` | Atlas `<nome>.png` + `sprites.json` | **Só** `npm run sprites` |
 | `portraits/` | `<id>.png` + `portraits.json` (lista de ids) | Usuário/agente |
+| `screenshots/` | Capturas de tela do jogo usadas no `README.md` | Usuário/agente |
 
 Nomes de arquivo: `<nome>_sheet.png|webp` em `source/`, sempre em minúsculas e sem espaços.
 
